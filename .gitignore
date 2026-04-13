@@ -1,0 +1,17 @@
+/training_logs.log
+/predictions/
+/dataframes/
+/playground.ipynb
+/representations/
+/optuna_results/
+/imgs/
+/weights/
+/plots/
+/training_logs_clinical.log
+/plotting.ipynb
+/training_logs_imaging.log
+/feature_importance.ipynb
+/training_logs_multimodal.log
+/production_plots/
+/training_logs_imaging_RN.log
+/training_logs_imaging_seg.log

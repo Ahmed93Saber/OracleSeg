@@ -1,0 +1,12 @@
+data:
+  geo_csv_path: "dataframes/threshold_df_new.csv"
+  curated_csv_path: "dataframes/molab_df_curated.csv"
+  img_seq_path: "imgs/prim_tum/molab-celestial-fire-110+seg-prim-tumor+int_resc.npy"
+  external_img_seq_path: "imgs/external_test_imgs-mit-seg-hs.npy"
+  dose_path: "C:/Users/gomaaad/Downloads/DS/MOLAB/OpenBTAI_METS_ClinicalData_Nov2023.xlsx"
+  pretrained_model_path: "C:/Users/gomaaad/PycharmProjects/pretrainedmodels/wandering-montain-121-ohne-mask/best_model_262_0.306.pt"
+  label_col: 'Type'
+  exclude_columns: ['Type', 'label-1RN-0Normal', 'Patient ID', 'id', 'BASELINE_TIME_POINT',
+                   "CROSSING_TIME_POINT", "scan_date", '1+2.0', '2+2.0',
+                    '2+3.0', '2+1.0', 'num_weeks_scaled']
+  sys_treatment_cols: ['HER2-directed', 'Capecitabine', 'Checkpoint Inhibitor', 'Gemcitabine', 'Bevacizumab', 'BRAF/MEK Inhibitor', 'Cisplatin/Carboplatin', 'Paclitaxel/Docetaxel', 'Temozolomide']
