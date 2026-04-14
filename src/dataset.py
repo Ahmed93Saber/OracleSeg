@@ -297,7 +297,7 @@ def create_tio_dataloaders_molab(molab_df_path, molab_data_dir, training_split_r
             max_length=8,
             num_workers=0,
             samples_per_volume=8,
-            sampler=tio.data.UniformSampler(patch_size_3d),
+            sampler=tio.data.LabelSampler(patch_size_3d),
             shuffle_subjects=False,
             shuffle_patches=False,
         )

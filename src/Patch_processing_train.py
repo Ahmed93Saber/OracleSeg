@@ -84,7 +84,7 @@ def train_one_fold_seg(model, train_loader, val_loader, criterion, optimizer, de
     best_model_state = model.state_dict()
     epochs_no_improve = 0
 
-    criterion = DiceCELoss(sigmoid=True, squared_pred=True, reduction='mean')
+    criterion = DiceCELoss(sigmoid=True, squared_pred=False, reduction='mean')
 
     for epoch in range(num_epochs):
 
@@ -136,9 +136,9 @@ def masking_function(x):
 
 
 # noinspection t
-def test_inference(model, test_subjects, device, patch_size=(64, 64, 64), patch_overlap=(8, 8, 8), batch_size=4):
-    dice_metric = DiceMetric(include_background=False, reduction="mean")
-    surface_dice_metric = SurfaceDiceMetric(class_thresholds=[0.5], include_background=False)
+def test_inference(model, test_subjects, device, patch_size=(64, 64, 64), patch_overlap=(16, 16, 16), batch_size=4):
+    dice_metric = DiceMetric(include_background=True, reduction="mean")
+    surface_dice_metric = SurfaceDiceMetric(class_thresholds=[0.5], include_background=True)
     # 2. Define the exact same preprocessing used in training
     pre_processing = tio.Compose([
         tio.ZNormalization(masking_method=masking_function),
