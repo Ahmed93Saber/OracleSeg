@@ -140,10 +140,11 @@ def test_inference(model, test_subjects, device, patch_size=(64, 64, 64), patch_
     dice_metric = DiceMetric(include_background=True, reduction="mean")
     surface_dice_metric = SurfaceDiceMetric(class_thresholds=[0.5], include_background=True)
     # 2. Define the exact same preprocessing used in training
+    pad = 32
     pre_processing = tio.Compose([
+        tio.Pad((pad, pad, pad)),
         tio.ZNormalization(masking_method=masking_function),
     ])
-
 
     dice_scores = []
     surface_dice_scores = []
@@ -165,6 +166,12 @@ def test_inference(model, test_subjects, device, patch_size=(64, 64, 64), patch_
 
         pred_volume = aggregator.get_output_tensor()
         gt_volume = subject['mask'][tio.DATA]
+
+        orig_d = pred_volume.shape[-3] - 2 * pad
+        orig_h = pred_volume.shape[-2] - 2 * pad
+        orig_w = pred_volume.shape[-1] - 2 * pad
+        pred_volume = pred_volume[..., pad:pad + orig_d, pad:pad + orig_h, pad:pad + orig_w]
+        gt_volume = gt_volume[..., pad:pad + orig_d, pad:pad + orig_h, pad:pad + orig_w]
 
         # Fix: Add Batch Dimension [1, 1, D, H, W]
         if pred_volume.ndim == 4:

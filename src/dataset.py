@@ -213,6 +213,10 @@ def create_subjects_list(pairs_list: List[Tuple[str, str]]) -> List[tio.Subject]
     for t1c_path, seg_path in pairs_list:
         mask = tio.LabelMap(seg_path)
         mask.data = torch.clamp(mask.data, max=1.0)
+        if mask.data.sum() == 0:
+            print(f"Skipping subject with empty mask: {seg_path}")
+            continue
+
         subject = tio.Subject(
             t1c=tio.ScalarImage(t1c_path),
             mask=mask
@@ -270,6 +274,7 @@ def create_tio_dataloaders_molab(molab_df_path, molab_data_dir, training_split_r
         fold_val_subjects = [training_subjects[i] for i in val_idx]
 
         pre_processing = tio.Compose([
+            tio.Pad((32, 32, 32)),
             tio.ZNormalization(masking_method=masking_function),
         ])
 
