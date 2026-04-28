@@ -13,7 +13,7 @@ from src.Patch_processing_train import run_patch_segmentation_cv
 
 
 class SegmentationObjective:
-    def __init__(self, config, epochs=300, patience=25):
+    def __init__(self, config, epochs=300, patience=15):
         self.config = config
         self.epochs = epochs
         self.patience = patience
@@ -28,9 +28,9 @@ class SegmentationObjective:
         # 1. Hyperparameter Sampling
         params = {
             "batch_size": trial.suggest_categorical("batch_size", [8, 16]),
-            "layers_to_unfreeze": trial.suggest_int("layers_to_unfreeze", 6, 9),
+            "layers_to_unfreeze": trial.suggest_int("layers_to_unfreeze", 8, 11),
             "met_ratio": trial.suggest_categorical("met_ration", [0.4, 0.5, 0.6, 0.7]),
-            "lr": trial.suggest_float("learning_rate", 1e-3, 1e-1, log=True),
+            "lr": trial.suggest_float("learning_rate", 1e-5, 1e-2, log=True),
             "rs": trial.suggest_int("random_state", 0, 10),
             "wd": trial.suggest_float("weight_decay", 1e-5, 1e-2, log=True),
         }
@@ -123,5 +123,5 @@ def main(num_epochs):
 
 
 if __name__ == "__main__":
-    num_epochs = 300
+    num_epochs = 500
     main(num_epochs)

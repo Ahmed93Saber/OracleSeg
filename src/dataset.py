@@ -250,7 +250,7 @@ def create_tio_dataloaders_molab(molab_df_path, molab_data_dir, training_split_r
         data_list.append((scan_path, seg_path))
 
     subjects = create_subjects_list(data_list)
-    num_subjects = len(data_list)
+    num_subjects = len(subjects)
     num_training_subjects = int(training_split_ratio * num_subjects)
     num_validation_subjects = num_subjects - num_training_subjects
 
@@ -273,21 +273,32 @@ def create_tio_dataloaders_molab(molab_df_path, molab_data_dir, training_split_r
         fold_train_subjects = [training_subjects[i] for i in train_idx]
         fold_val_subjects = [training_subjects[i] for i in val_idx]
 
-        pre_processing = tio.Compose([
+        train_preprocessing = tio.Compose([
             tio.Pad((32, 32, 32)),
             tio.ZNormalization(masking_method=masking_function),
+            # Augmentation — applied only during training
+            tio.RandomFlip(axes=['LR']),  # anatomically valid for brain
+            tio.RandomAffine(scales=(0.9, 1.1), degrees=10, translation=5),
+            tio.RandomNoise(std=(0, 0.1)),
+            tio.RandomBiasField(coefficients=0.3),  # MRI-specific artefact
+            tio.RandomGamma(log_gamma=(-0.1, 0.1)),
         ])
 
-        # Create datasets with transforms
-        fold_train_dataset = tio.SubjectsDataset(fold_train_subjects, transform=pre_processing)
-        fold_val_dataset = tio.SubjectsDataset(fold_val_subjects, transform=pre_processing)
+        val_preprocessing = tio.Compose([
+            tio.Pad((32, 32, 32)),
+            tio.ZNormalization(masking_method=masking_function),
+            # No augmentation
+        ])
+
+        fold_train_dataset = tio.SubjectsDataset(fold_train_subjects, transform=train_preprocessing)
+        fold_val_dataset = tio.SubjectsDataset(fold_val_subjects, transform=val_preprocessing)
 
         # Create patch-based queues
         fold_train_queue = tio.Queue(
             subjects_dataset=fold_train_dataset,
-            max_length=8,
+            max_length=128,
             num_workers=0,
-            samples_per_volume=8,
+            samples_per_volume=16,
             sampler=tio.data.LabelSampler(
                 patch_size=patch_size_3d,
                 label_name="mask",
@@ -299,10 +310,14 @@ def create_tio_dataloaders_molab(molab_df_path, molab_data_dir, training_split_r
 
         fold_val_queue = tio.Queue(
             subjects_dataset=fold_val_dataset,
-            max_length=8,
+            max_length=128,
             num_workers=0,
-            samples_per_volume=8,
-            sampler=tio.data.LabelSampler(patch_size_3d),
+            samples_per_volume=16,
+            sampler=tio.data.LabelSampler(
+                patch_size=patch_size_3d,
+                label_name="mask",
+                # label_probabilities={0: 1 - float(met_ration), 1: float(met_ration)},
+            ),
             shuffle_subjects=False,
             shuffle_patches=False,
         )

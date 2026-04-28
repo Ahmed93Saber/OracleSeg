@@ -62,16 +62,14 @@ def validate_epoch(model, dataloader, device):
 
             batch_dices = torch.zeros(inputs.size(0), device=device)
 
-            # Case A: Both empty (Correct rejection) -> Score 1.0
-            empty_mask = (union == 0)
-            batch_dices[empty_mask] = 1.0
-
-            # Case B: Not empty -> Standard Dice formula
-            non_empty_mask = ~empty_mask
+            has_target = (targets.flatten(start_dim=1).sum(dim=1) > 0)  # [B]
+            non_empty_mask = ~(union == 0)
             if non_empty_mask.any():
                 batch_dices[non_empty_mask] = (2. * intersection[non_empty_mask]) / (union[non_empty_mask] + 1e-5)
 
-            epoch_dices.extend(batch_dices.cpu().tolist())
+            for b in range(inputs.size(0)):
+                if has_target[b]:
+                    epoch_dices.append(batch_dices[b].item())
 
     mean_dice = np.mean(epoch_dices) if epoch_dices else 0.0
     return mean_dice, positive_preds_count, total_patches
